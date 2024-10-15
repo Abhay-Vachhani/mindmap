@@ -1,0 +1,33 @@
+name: Deploy Dist
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Copy dist to dist branch
+        run: |
+          git fetch origin dist:dist || git checkout --orphan dist
+          git checkout dist
+
+          cp -r dist/* .
+
+          git add .
+          git commit -m "Copy dist folder contents" || echo "No changes to commit"
+
+          git push origin dist --force
