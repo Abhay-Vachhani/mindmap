@@ -26,12 +26,20 @@ jobs:
           git fetch origin dist:dist || git checkout --orphan dist
           git checkout dist
 
+      - name: Clear existing contents in the root of dist branch
+        run: |
+          # Clear existing contents
+          rm -rf *
+
       - name: Copy dist contents
         run: |
-          # Clear existing contents in the root of dist branch
-          rm -rf *
-          # Copy new contents from the dist directory
-          cp -r dist/* .
+          # Check if dist directory exists and copy contents
+          if [ -d ../dist ]; then
+            cp -r ../dist/* .
+          else
+            echo "No dist directory found to copy."
+            exit 1
+          fi
 
       - name: Commit and push changes
         run: |
