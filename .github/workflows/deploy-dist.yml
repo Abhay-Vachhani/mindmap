@@ -10,39 +10,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout master
+      - name: Checkout dist branch
         uses: actions/checkout@v2
         with:
-          ref: master
+          ref: dist
 
       - name: Set up Git
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
-      - name: Prepare dist branch
+      - name: Remove existing files in the dist branch
         run: |
-          # Fetch the dist branch
-          git fetch origin dist:dist || git checkout --orphan dist
-          git checkout dist
+          git rm -r --cached . || true
+          rm -rf * || true  # This clears the working directory
 
-      - name: Clear existing contents in the root of dist branch
+      - name: Copy all files from the dist directory in master
         run: |
-          # Clear existing contents
-          rm -rf *
+          git checkout master -- dist/*
 
-      - name: Copy dist contents
-        run: |
-          # Check if dist directory exists and copy contents
-          if [ -d ../dist ]; then
-            cp -r ../dist/* .
-          else
-            echo "No dist directory found to copy."
-            exit 1
-          fi
-
-      - name: Commit and push changes
+      - name: Stage changes
         run: |
           git add .
-          git commit -m "Copy dist folder contents" || echo "No changes to commit"
-          git push origin dist --force
+
+      - name: Commit changes
+        run: |
+          git commit -m "Copy all files from dist directory of master to root of dist branch" || echo "No changes to commit"
+
+      - name: Push changes to dist branch
+        run: |
+          git push origin dist
