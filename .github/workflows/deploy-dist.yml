@@ -3,7 +3,7 @@ name: Deploy Dist
 on:
   push:
     branches:
-      - master
+      - master  # Trigger on pushes to the master branch
 
 jobs:
   deploy:
@@ -20,14 +20,18 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
+      - name: Checkout master branch
+        run: |
+          git fetch origin master  # Replace 'master' with 'main' if necessary
+          git checkout master || git checkout -b master
+
       - name: Remove existing files in the dist branch
         run: |
-          git rm -r --cached . || true
-          rm -rf * || true  # This clears the working directory
+          rm -rf * || true  # Clears the working directory
 
       - name: Copy all files from the dist directory in master
         run: |
-          git checkout master -- dist/*
+          git checkout master -- dist/* || echo "No files to copy from dist directory."
 
       - name: Stage changes
         run: |
